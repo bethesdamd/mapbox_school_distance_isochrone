@@ -87,11 +87,11 @@
 
     var locations = [
       {"name": "school1", "lat": 19.20070481, "lon": -99.04018432 },
-      {"name": "school2", "lat": 19.21, "lon": -99.05 },
-      {"name": "school2", "lat": 19.22, "lon": -99.06 }
+      {"name": "school2", "lat": 19.31, "lon": -99.05 },
+      {"name": "school2", "lat": 19.52, "lon": -99.06 }
     ];
 
-    var features = {"features": [], "type": "FeatureCollection"};
+    // var features = {"features": [], "type": "FeatureCollection"};
 
     // Create variables to use in getIso()
     var urlBase = 'https://api.mapbox.com/isochrone/v1/mapbox/';
@@ -158,17 +158,18 @@
         if (start == end) {
           return;
         } else {
-          console.log("sending lat/lon: " + locations[number]['lat'] + ',' + locations[number]['lon']);
-          var query = urlBase + profile + '/' + locations[number]['lon'] + ',' + locations[number]['lat'] + '?contours_minutes=' + minutes + '&polygons=true&access_token=' + mapboxgl.accessToken;
+          console.log("cycle: " + start);
+          console.log("sending lat/lon: " + locations[start]['lat'] + ',' + locations[start]['lon']);
+          var query = urlBase + profile + '/' + locations[start]['lon'] + ',' + locations[start]['lat'] + '?contours_minutes=' + minutes + '&polygons=true&access_token=' + mapboxgl.accessToken;
           $.ajax({
             method: "GET",
             url: query }).done(function(data) {
               features_array.push(data);
+
               console.log(data);
               number += getIso(start + 1, end);
             })
           }
-        console.log(number);
         return number;
       }
 
@@ -176,7 +177,7 @@
       // Make the API call
       var features_array = [];
       getIso(0, locations.length);
-    });
+    });  // END OF ON LOAD
 
     // Target the "params" form in the HTML portion of your code
     var params = document.getElementById('params');
