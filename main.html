@@ -46,11 +46,11 @@
       <h4 class='txt-m txt-bold mb6'>Chose a travel mode:</h4>
       <div class='mb12 mr12 toggle-group align-center'>
         <label class='toggle-container'>
-          <input name='profile' type='radio' value='walking'>
+          <input name='profile' type='radio' value='walking' checked>
           <div class='toggle toggle--active-null toggle--null'>Walking</div>
         </label>
         <label class='toggle-container'>
-          <input name='profile' type='radio' value='cycling' checked>
+          <input name='profile' type='radio' value='cycling' >
           <div class='toggle toggle--active-null toggle--null'>Cycling</div>
         </label>
         <label class='toggle-container'>
@@ -82,18 +82,18 @@
       container: 'map', // Specify the container ID
       style: 'mapbox://styles/mapbox/streets-v11', // Specify which map style to use
       center: [-99.04018432, 19.20070481], // Specify the starting position
-      zoom: 10.5, // Specify the starting zoom
+      zoom: 13.5, // Specify the starting zoom
     });
 
     var locations = [
       {"name": "school1", "lat": 19.20, "lon": -99.04 },
-      {"name": "school2", "lat": 19.27, "lon": -99.15 },
-      {"name": "school2", "lat": 19.23, "lon": -99.06 }
+      {"name": "school2", "lat": 19.21, "lon": -99.05 },
+      {"name": "school2", "lat": 19.22, "lon": -99.06 }
     ];
 
     // Create variables to use in getIso()
     var urlBase = 'https://api.mapbox.com/isochrone/v1/mapbox/';
-    var profile = 'cycling';
+    var profile = 'walking';
     var minutes = 20;
 
     // Get random int
@@ -110,6 +110,8 @@
       return "#" + out;
     }
 
+    colors = ['#449900', '#880099', '#996633'];
+
     var features_array = [];
 
     function getIso(start, end) {
@@ -117,10 +119,6 @@
       ns = number.toString();
       if (start == end) {
         d = {"features": features_array, "type": "FeatureCollection"};
-        //console.log(d);
-        source = 'iso' + ns;
-        console.log(source);
-        // map.getSource(source).setData(d);
         return;
       } else {
         console.log("sending lat/lon: " + locations[start]['lat'] + ',' + locations[start]['lon']);
@@ -128,12 +126,8 @@
         $.ajax({
           method: "GET",
           url: query }).done(function(data) {
-            // features_array.push(data['features'][0]);
             // console.log(data);
-
             map.getSource('iso' + start.toString()).setData(data);
-
-
             number += getIso(start + 1, end);
           })
         }
@@ -165,7 +159,7 @@
         }
       });
 
-      c = randColor();
+      c = colors[g];
       map.addLayer({
         'id': 'isoLayer' + gs,
         'type': 'fill',
