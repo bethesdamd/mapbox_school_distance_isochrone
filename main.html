@@ -87,8 +87,8 @@
 
     var locations = [
       {"name": "school1", "lat": 19.20070481, "lon": -99.04018432 },
-      {"name": "school2", "lat": 19.31, "lon": -99.05 },
-      {"name": "school2", "lat": 19.52, "lon": -99.06 }
+      {"name": "school2", "lat": 19.21, "lon": -99.05 },
+      {"name": "school2", "lat": 19.22, "lon": -99.06 }
     ];
 
     // var features = {"features": [], "type": "FeatureCollection"};
@@ -112,7 +112,6 @@
     //     //map.getSource(loc['name']).setData(data);
     //   })
     // };
-
 
 
     var marker = new mapboxgl.Marker({
@@ -145,8 +144,8 @@
         'layout': {},
         'paint': {
           // The fill color for the layer is set to a light purple
-          'fill-color': '#5a3fc0',
-          'fill-opacity': 0.4
+          'fill-color': '#880000',
+          'fill-opacity': 0.8
         }
       }, "poi-label");
 
@@ -156,6 +155,9 @@
       function getIso(start, end) {
         var number = 0;
         if (start == end) {
+          d = {"features": features_array, "type": "FeatureCollection"};
+          //console.log(d);
+          map.getSource('iso').setData(d);
           return;
         } else {
           console.log("cycle: " + start);
@@ -164,8 +166,7 @@
           $.ajax({
             method: "GET",
             url: query }).done(function(data) {
-              features_array.push(data);
-
+              features_array.push(data['features'][0]);
               console.log(data);
               number += getIso(start + 1, end);
             })
@@ -176,7 +177,9 @@
 
       // Make the API call
       var features_array = [];
+
       getIso(0, locations.length);
+
     });  // END OF ON LOAD
 
     // Target the "params" form in the HTML portion of your code
