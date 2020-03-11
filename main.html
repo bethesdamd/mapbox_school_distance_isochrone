@@ -82,13 +82,13 @@
       container: 'map', // Specify the container ID
       style: 'mapbox://styles/mapbox/streets-v11', // Specify which map style to use
       center: [-99.04018432, 19.20070481], // Specify the starting position
-      zoom: 11.5, // Specify the starting zoom
+      zoom: 8.5, // Specify the starting zoom
     });
 
     var locations = [
-      {"name": "school1", "lat": 19.20070481, "lon": -99.04018432 },
-      {"name": "school2", "lat": 19.21, "lon": -99.05 },
-      {"name": "school2", "lat": 19.22, "lon": -99.06 }
+      {"name": "school1", "lat": 19.20, "lon": -99.04 },
+      {"name": "school2", "lat": 19.33, "lon": -99.05 },
+      {"name": "school2", "lat": 19.46, "lon": -99.06 }
     ];
 
     // var features = {"features": [], "type": "FeatureCollection"};
@@ -96,22 +96,21 @@
     // Create variables to use in getIso()
     var urlBase = 'https://api.mapbox.com/isochrone/v1/mapbox/';
     var profile = 'cycling';
-    var minutes = 10;
+    var minutes = 20;
 
-    // Create a function that sets up the Isochrone API query then makes an Ajax call
-    // function getIso(flat, flon) {
-    //   var query = urlBase + profile + '/' + flon + ',' + flat + '?contours_minutes=' + minutes + '&polygons=true&access_token=' + mapboxgl.accessToken;
-    //
-    //   $.ajax({
-    //     method: 'GET',
-    //     url: query
-    //   }).done(function(data) {
-    //     console.log(data);
-    //     features["features"] = features["features"].push(data);
-    //     // Set the 'iso' source's data to what's returned by the API query
-    //     //map.getSource(loc['name']).setData(data);
-    //   })
-    // };
+    // Get random int
+    function gri(max) {
+      return Math.floor(Math.random() * Math.floor(max));
+    }
+
+    function randColor() {
+      out = "";
+      c = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'];
+      for(x=0; x<6; x++) {
+        out = out + c[gri(16)].toString();
+      }
+      return "#" + out;
+    }
 
 
     var marker = new mapboxgl.Marker({
@@ -139,12 +138,10 @@
       map.addLayer({
         'id': 'isoLayer',
         'type': 'fill',
-        // Use "iso" as the data source for this layer
         'source': 'iso',
         'layout': {},
         'paint': {
-          // The fill color for the layer is set to a light purple
-          'fill-color': '#880000',
+          'fill-color': "#880000",
           'fill-opacity': 0.8
         }
       }, "poi-label");
@@ -160,13 +157,17 @@
           map.getSource('iso').setData(d);
           return;
         } else {
-          console.log("cycle: " + start);
           console.log("sending lat/lon: " + locations[start]['lat'] + ',' + locations[start]['lon']);
           var query = urlBase + profile + '/' + locations[start]['lon'] + ',' + locations[start]['lat'] + '?contours_minutes=' + minutes + '&polygons=true&access_token=' + mapboxgl.accessToken;
           $.ajax({
             method: "GET",
             url: query }).done(function(data) {
+              data['features'][0]['properties']['color'] = '#008800';
+              data['features'][0]['properties']['fill'] = '#008800';
+              data['features'][0]['properties']['fillColor'] = '#008800';
+
               features_array.push(data['features'][0]);
+
               console.log(data);
               number += getIso(start + 1, end);
             })
@@ -177,7 +178,6 @@
 
       // Make the API call
       var features_array = [];
-
       getIso(0, locations.length);
 
     });  // END OF ON LOAD
