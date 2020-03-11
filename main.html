@@ -82,16 +82,14 @@
       container: 'map', // Specify the container ID
       style: 'mapbox://styles/mapbox/streets-v11', // Specify which map style to use
       center: [-99.04018432, 19.20070481], // Specify the starting position
-      zoom: 8.5, // Specify the starting zoom
+      zoom: 10.5, // Specify the starting zoom
     });
 
     var locations = [
       {"name": "school1", "lat": 19.20, "lon": -99.04 },
-      {"name": "school2", "lat": 19.33, "lon": -99.05 },
-      {"name": "school2", "lat": 19.46, "lon": -99.06 }
+      {"name": "school2", "lat": 19.27, "lon": -99.15 },
+      {"name": "school2", "lat": 19.23, "lon": -99.06 }
     ];
-
-    // var features = {"features": [], "type": "FeatureCollection"};
 
     // Create variables to use in getIso()
     var urlBase = 'https://api.mapbox.com/isochrone/v1/mapbox/';
@@ -112,22 +110,54 @@
       return "#" + out;
     }
 
+    var features_array = [];
 
-    var marker = new mapboxgl.Marker({
-      'color': '#314ccd'
-    });
+    function getIso(start, end) {
+      var number = 0;
+      ns = number.toString();
+      if (start == end) {
+        d = {"features": features_array, "type": "FeatureCollection"};
+        //console.log(d);
+        source = 'iso' + ns;
+        console.log(source);
+        // map.getSource(source).setData(d);
+        return;
+      } else {
+        console.log("sending lat/lon: " + locations[start]['lat'] + ',' + locations[start]['lon']);
+        var query = urlBase + profile + '/' + locations[start]['lon'] + ',' + locations[start]['lat'] + '?contours_minutes=' + minutes + '&polygons=true&access_token=' + mapboxgl.accessToken;
+        $.ajax({
+          method: "GET",
+          url: query }).done(function(data) {
+            // features_array.push(data['features'][0]);
+            // console.log(data);
 
-    // Create a LngLat object to use in the marker initialization
-    // https://docs.mapbox.com/mapbox-gl-js/api/#lnglat
-    // var lngLat = {
-    //   lon: lon,
-    //   lat: lat
-    // };
+            map.getSource('iso' + start.toString()).setData(data);
+
+
+            number += getIso(start + 1, end);
+          })
+        }
+      return number;
+    }
+
+
+    function clearSources() {
+
+      // map.removeLayer('isoLayer0');
+
+      // for(g=0; g < locations.length; g++) {
+      //   gs = g.toString();
+      //   // map.removeSource('iso' + gs);
+      //   map.getSource('iso' + gs).setData({"type": "FeatureCollection", "features": []});
+      // }
+    }
 
     map.on('load', function() {
       // When the map loads, add the source and layer
 
-      map.addSource('iso', {
+    for(g=0; g < locations.length; g++) {
+      gs = g.toString();
+      map.addSource('iso' + gs, {
         type: 'geojson',
         data: {
           "type": 'FeatureCollection',
@@ -135,49 +165,28 @@
         }
       });
 
+      c = randColor();
       map.addLayer({
-        'id': 'isoLayer',
+        'id': 'isoLayer' + gs,
         'type': 'fill',
-        'source': 'iso',
+        'source': 'iso' + gs,
         'layout': {},
         'paint': {
-          'fill-color': "#880000",
+          'fill-color': c,
           'fill-opacity': 0.8
         }
       }, "poi-label");
+    }
 
-      // Initialize the marker at the query coordinates
-      // marker.setLngLat(lngLat).addTo(map);
+    for(p=0; p < locations.length; p++) {
+      var marker = new mapboxgl.Marker({
+        'color': randColor()
+      });
+      var lngLat = {lon: locations[p]['lon'], lat: locations[p]['lat']};
+      marker.setLngLat(lngLat).addTo(map);
+    }
 
-      function getIso(start, end) {
-        var number = 0;
-        if (start == end) {
-          d = {"features": features_array, "type": "FeatureCollection"};
-          //console.log(d);
-          map.getSource('iso').setData(d);
-          return;
-        } else {
-          console.log("sending lat/lon: " + locations[start]['lat'] + ',' + locations[start]['lon']);
-          var query = urlBase + profile + '/' + locations[start]['lon'] + ',' + locations[start]['lat'] + '?contours_minutes=' + minutes + '&polygons=true&access_token=' + mapboxgl.accessToken;
-          $.ajax({
-            method: "GET",
-            url: query }).done(function(data) {
-              data['features'][0]['properties']['color'] = '#008800';
-              data['features'][0]['properties']['fill'] = '#008800';
-              data['features'][0]['properties']['fillColor'] = '#008800';
-
-              features_array.push(data['features'][0]);
-
-              console.log(data);
-              number += getIso(start + 1, end);
-            })
-          }
-        return number;
-      }
-
-
-      // Make the API call
-      var features_array = [];
+      marker.setLngLat(lngLat).addTo(map);
       getIso(0, locations.length);
 
     });  // END OF ON LOAD
@@ -189,10 +198,12 @@
     params.addEventListener('change', function(e) {
       if (e.target.name === 'profile') {
         profile = e.target.value;
-        getIso();
+        // clearSources();
+        getIso(0, locations.length);
       } else if (e.target.name === 'duration') {
         minutes = e.target.value;
-        getIso();
+        // clearSources();
+        getIso(0, locations.length);
       }
     });
   </script>
