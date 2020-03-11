@@ -85,25 +85,35 @@
       zoom: 11.5, // Specify the starting zoom
     });
 
+    var locations = [
+      {"name": "school1", "lat": 19.20070481, "lon": -99.04018432 },
+      {"name": "school2", "lat": 19.21, "lon": -99.05 },
+      {"name": "school2", "lat": 19.22, "lon": -99.06 }
+    ];
+
+    var features = {"features": [], "type": "FeatureCollection"};
+
     // Create variables to use in getIso()
     var urlBase = 'https://api.mapbox.com/isochrone/v1/mapbox/';
-    var lon = -99.04018432;
-    var lat = 19.20070481;
     var profile = 'cycling';
     var minutes = 10;
 
     // Create a function that sets up the Isochrone API query then makes an Ajax call
-    function getIso() {
-      var query = urlBase + profile + '/' + lon + ',' + lat + '?contours_minutes=' + minutes + '&polygons=true&access_token=' + mapboxgl.accessToken;
+    // function getIso(flat, flon) {
+    //   var query = urlBase + profile + '/' + flon + ',' + flat + '?contours_minutes=' + minutes + '&polygons=true&access_token=' + mapboxgl.accessToken;
+    //
+    //   $.ajax({
+    //     method: 'GET',
+    //     url: query
+    //   }).done(function(data) {
+    //     console.log(data);
+    //     features["features"] = features["features"].push(data);
+    //     // Set the 'iso' source's data to what's returned by the API query
+    //     //map.getSource(loc['name']).setData(data);
+    //   })
+    // };
 
-      $.ajax({
-        method: 'GET',
-        url: query
-      }).done(function(data) {
-        // Set the 'iso' source's data to what's returned by the API query
-        map.getSource('iso').setData(data);
-      })
-    };
+
 
     var marker = new mapboxgl.Marker({
       'color': '#314ccd'
@@ -111,13 +121,14 @@
 
     // Create a LngLat object to use in the marker initialization
     // https://docs.mapbox.com/mapbox-gl-js/api/#lnglat
-    var lngLat = {
-      lon: lon,
-      lat: lat
-    };
+    // var lngLat = {
+    //   lon: lon,
+    //   lat: lat
+    // };
 
     map.on('load', function() {
       // When the map loads, add the source and layer
+
       map.addSource('iso', {
         type: 'geojson',
         data: {
@@ -135,15 +146,36 @@
         'paint': {
           // The fill color for the layer is set to a light purple
           'fill-color': '#5a3fc0',
-          'fill-opacity': 0.3
+          'fill-opacity': 0.4
         }
       }, "poi-label");
 
       // Initialize the marker at the query coordinates
-      marker.setLngLat(lngLat).addTo(map);
+      // marker.setLngLat(lngLat).addTo(map);
+
+      function getIso(start, end) {
+        var number = 0;
+        if (start == end) {
+          return;
+        } else {
+          console.log("sending lat/lon: " + locations[number]['lat'] + ',' + locations[number]['lon']);
+          var query = urlBase + profile + '/' + locations[number]['lon'] + ',' + locations[number]['lat'] + '?contours_minutes=' + minutes + '&polygons=true&access_token=' + mapboxgl.accessToken;
+          $.ajax({
+            method: "GET",
+            url: query }).done(function(data) {
+              features_array.push(data);
+              console.log(data);
+              number += getIso(start + 1, end);
+            })
+          }
+        console.log(number);
+        return number;
+      }
+
 
       // Make the API call
-      getIso();
+      var features_array = [];
+      getIso(0, locations.length);
     });
 
     // Target the "params" form in the HTML portion of your code
