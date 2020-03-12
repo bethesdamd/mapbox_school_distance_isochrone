@@ -20,6 +20,8 @@
   <script src='https://api.mapbox.com/mapbox-assembly/v0.23.2/assembly.js'> </script>
   <!-- Import jQuery -->
   <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js'></script>
+  <!-- Import turf.js -->
+  <script src='https://npmcdn.com/@turf/turf/turf.min.js'></script>
 
   <style>
     body {
@@ -91,6 +93,12 @@
       {"name": "school2", "lat": 19.22, "lon": -99.06 }
     ];
 
+    var students = [
+				{ "type": "Feature", "properties": { "Name": "student 1"}, "geometry": { "type": "Point", "coordinates": [ -99.05, 19.20 ] } },
+				{ "type": "Feature", "properties": { "Name": "student 2"}, "geometry": { "type": "Point", "coordinates": [ -99.05, 19.22 ] } }
+			]
+
+
     // Create variables to use in getIso()
     var urlBase = 'https://api.mapbox.com/isochrone/v1/mapbox/';
     var profile = 'walking';
@@ -112,13 +120,13 @@
 
     colors = ['#449900', '#880099', '#996633'];
 
-    var features_array = [];
+    // var features_array = [];
 
     function getIso(start, end) {
       var number = 0;
       ns = number.toString();
       if (start == end) {
-        d = {"features": features_array, "type": "FeatureCollection"};
+        // d = {"features": features_array, "type": "FeatureCollection"};
         return;
       } else {
         console.log("sending lat/lon: " + locations[start]['lat'] + ',' + locations[start]['lon']);
@@ -126,7 +134,8 @@
         $.ajax({
           method: "GET",
           url: query }).done(function(data) {
-            // console.log(data);
+            console.log(data);
+            console.log(turf.area(data['features'][0]['geometry']))
             map.getSource('iso' + start.toString()).setData(data);
             number += getIso(start + 1, end);
           })
@@ -134,17 +143,11 @@
       return number;
     }
 
-
-    function clearSources() {
-
-      // map.removeLayer('isoLayer0');
-
-      // for(g=0; g < locations.length; g++) {
-      //   gs = g.toString();
-      //   // map.removeSource('iso' + gs);
-      //   map.getSource('iso' + gs).setData({"type": "FeatureCollection", "features": []});
-      // }
+    // Returns a FeatureCollection
+    function generatePoints() {
+      return turf.randomPoint(50, {bbox: [-99.05, 19.20, -99.04, 19.21]});
     }
+
 
     map.on('load', function() {
       // When the map loads, add the source and layer
@@ -172,6 +175,23 @@
       }, "poi-label");
     }
 
+    map.addSource('students', {
+      type: 'geojson',
+      data: {
+        "type": 'FeatureCollection',
+        "features": []
+      }
+    });
+
+    map.addLayer({
+      'id': 'students',
+      'type': 'circle',
+      'source': 'students',
+      'layout': {}
+    });
+
+    map.getSource('students').setData(generatePoints(['features']));
+
     for(p=0; p < locations.length; p++) {
       var marker = new mapboxgl.Marker({
         'color': randColor()
@@ -182,6 +202,7 @@
 
       marker.setLngLat(lngLat).addTo(map);
       getIso(0, locations.length);
+      console.log(generatePoints());
 
     });  // END OF ON LOAD
 
