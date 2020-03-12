@@ -1,16 +1,10 @@
 <!DOCTYPE html>
 <html>
-<!-- see https://docs.mapbox.com/help/tutorials/get-started-isochrone-api/ -->
-
-<!-- good school locations
--99.10421703, 19.18240822
--99.04018432, 19.20070481
-
--->
+<!-- Based upon: https://docs.mapbox.com/help/tutorials/get-started-isochrone-api/ -->
 
 <head>
   <meta charset='utf-8' />
-  <title>Get started with the Isochrone API</title>
+  <title>Isochrone demonstration</title>
   <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
   <!-- Import Mapbox GL JS  -->
   <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.8.1/mapbox-gl.js'></script>
@@ -47,7 +41,7 @@
   <!-- Create a sidebar with buttons for each option -->
   <div class='absolute fl my24 mx24 py24 px24 bg-gray-faint round'>
     <form id='params'>
-      <h4>Number of children close to<br>each proposed site:</h4>
+      <h4>Number of children close to<br>each proposed school site:</h4>
       <h5><div id='info1'></div></h5>
       <h5><div id='info2'></div></h5>
       <h5><div id='info3'></div></h5>
@@ -70,7 +64,7 @@
       <h4 class='txt-m txt-bold mb6'>Choose a maximum duration:</h4>
       <div class='mb12 mr12 toggle-group align-center'>
         <label class='toggle-container'>
-          <input name='duration' type='radio' value='10' checked>
+          <input name='duration' type='radio' value='10'>
           <div class='toggle toggle--active-null toggle--null'>10 min</div>
         </label>
         <label class='toggle-container'>
@@ -78,7 +72,7 @@
           <div class='toggle toggle--active-null toggle--null'>20 min</div>
         </label>
         <label class='toggle-container'>
-          <input name='duration' type='radio' value='30'>
+          <input name='duration' type='radio' value='30' checked>
           <div class='toggle toggle--active-null toggle--null'>30 min</div>
         </label>
     </form>
@@ -103,7 +97,7 @@
     // Create variables to use in getIso()
     var urlBase = 'https://api.mapbox.com/isochrone/v1/mapbox/';
     var profile = 'walking';
-    var minutes = 20;
+    var minutes = 30;
 
     // Get random int
     function gri(max) {
@@ -133,9 +127,9 @@
         s1 = turf.pointsWithinPolygon(student_points,data_only[1])['features'].length;
         s2 = turf.pointsWithinPolygon(student_points,data_only[2])['features'].length;
 
-        txt1 = "School #1: " + s0.toString();
-        txt2 = "School #2: " + s1.toString();
-        txt3 = "School #3: " + s2.toString();
+        txt1 = "Site #1: " + s0.toString();
+        txt2 = "Site #2: " + s1.toString();
+        txt3 = "Site #3: " + s2.toString();
 
         $('#info1').text(txt1);
         $('#info2').text(txt2);
